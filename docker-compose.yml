@@ -1,0 +1,110 @@
+version: '3.8'
+
+services:
+  # Main Django application service
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agriconnect_web
+    command: >
+      bash -c "
+      python backend/manage.py migrate &&
+      python backend/manage.py collectstatic --noinput &&
+      gunicorn --bind 0.0.0.0:8000 --workers 3 --worker-class sync --timeout 60 --access-logfile - --error-logfile - backend.agriconnect.wsgi:application
+      "
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - DEBUG=False
+      - ENVIRONMENT=production
+    volumes:
+      # Mount for persistent data
+      - ./myproject/media:/app/media
+      - ./myproject/staticfiles:/app/staticfiles
+      - ./myproject/backend/db.sqlite3:/app/backend/db.sqlite3
+    depends_on:
+      # Uncomment if using PostgreSQL
+      # - db
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - agriconnect_network
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.agriconnect.rule=Host(`localhost`)"
+      - "traefik.http.services.agriconnect.loadbalancer.server.port=8000"
+
+  # Redis for caching and sessions (optional but recommended)
+  redis:
+    image: redis:7-alpine
+    container_name: agriconnect_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - agriconnect_network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  # PostgreSQL database (optional - uncomment to use)
+  # db:
+  #   image: postgres:15-alpine
+  #   container_name: agriconnect_db
+  #   environment:
+  #     POSTGRES_DB: ${DATABASE_NAME:-agriconnect}
+  #     POSTGRES_USER: ${DATABASE_USER:-agriconnect}
+  #     POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-your-secure-password}
+  #     POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER:-agriconnect}"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #   networks:
+  #     - agriconnect_network
+  #   restart: unless-stopped
+
+  # Nginx reverse proxy (optional - for better performance)
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: agriconnect_nginx
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./myproject/staticfiles:/app/staticfiles:ro
+  #     - ./myproject/media:/app/media:ro
+  #     - ./certs:/etc/nginx/certs:ro
+  #   depends_on:
+  #     - web
+  #   networks:
+  #     - agriconnect_network
+  #   restart: unless-stopped
+
+volumes:
+  redis_data:
+  # postgres_data:
+
+networks:
+  agriconnect_network:
+    driver: bridge

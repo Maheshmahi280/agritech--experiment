@@ -1,0 +1,89 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+media/
+
+# Static files
+staticfiles/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment variables and secrets
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+secrets.json
+credentials/
+
+# Docker volumes
+postgres_data/
+redis_data/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Temporary files
+tmp/
+temp/
+*.bak
+.cache/
+
+# Test coverage
+.coverage
+htmlcov/
+coverage.xml
+
+# Uploaded files (user media/data)
+/uploads
+/downloads
+/backups
+
+# CI/CD logs
+.github/workflows/*.log
+.gitlab-ci/logs/
+
+# IDE additional
+.project
+.pydevproject
+*.sublime-project
+*.sublime-workspace
+
+# Deployment
+*.pem
+docker_credentials.json
+
+# Cache files
+__pycache__/
+*.cache
+.pytest_cache/
+
+# Environment
+.env
+*.env
+
+# Byte-compiled files
+*.pyc

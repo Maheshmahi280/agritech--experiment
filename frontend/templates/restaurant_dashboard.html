@@ -1,0 +1,920 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Dashboard - AgriConnect</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>"> {% load static %}
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5dc;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2d5a27 0%, #4a7c43 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .logo span {
+            color: #90ee90;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        
+        nav a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-logout {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        /* Profile Dropdown */
+        
+        .profile-menu {
+            position: relative;
+        }
+        
+        .btn-profile {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: inline-block;
+        }
+        
+        .btn-profile:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .profile-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 120%;
+            background: white;
+            min-width: 350px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            overflow: hidden;
+        }
+        
+        .profile-dropdown.show {
+            display: block;
+        }
+        
+        .profile-dropdown-header {
+            background: linear-gradient(135deg, #2d5a27 0%, #4a7c43 100%);
+            color: white;
+            padding: 1.5rem;
+        }
+        
+        .profile-dropdown-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+        
+        .profile-dropdown-header p {
+            margin: 0.5rem 0 0 0;
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        
+        .profile-dropdown-body {
+            padding: 1rem;
+        }
+        
+        .profile-info-item {
+            padding: 0.75rem;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: start;
+            gap: 0.75rem;
+        }
+        
+        .profile-info-item:last-child {
+            border-bottom: none;
+        }
+        
+        .profile-info-icon {
+            font-size: 1.2rem;
+        }
+        
+        .profile-info-content {
+            flex: 1;
+        }
+        
+        .profile-info-label {
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        
+        .profile-info-value {
+            color: #333;
+            margin-top: 0.25rem;
+            font-size: 0.95rem;
+        }
+        
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .welcome-section {
+            background: white;
+            padding: 1.5rem 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            border-left: 5px solid #e67e22;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .welcome-section h1 {
+            color: #2d5a27;
+            margin-bottom: 0.5rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card h2 {
+            color: #2d5a27;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #90ee90;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            border-top: 4px solid #4a7c43;
+        }
+        
+        .stat-card.orange {
+            border-top-color: #e67e22;
+        }
+        
+        .stat-card.blue {
+            border-top-color: #3498db;
+        }
+        
+        .stat-card h3 {
+            font-size: 2rem;
+            color: #2d5a27;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-card p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .filter-section {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .filter-section h3 {
+            color: #555;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+        
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .filter-group label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .filter-group select,
+        .filter-group input {
+            padding: 0.6rem 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-request {
+            background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+        
+        .btn-request:hover {
+            transform: translateY(-1px);
+        }
+        
+        .btn-filter {
+            background: #6c757d;
+            color: white;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.95rem;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        th,
+        td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        th {
+            background: #f8f9fa;
+            color: #2d5a27;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+        
+        tr:hover {
+            background: #f5f5f5;
+        }
+        
+        .status {
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .status-available {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-low {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-out {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .order-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .order-accepted {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .order-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        footer {
+            background: #2d5a27;
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .empty-message {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+        /* Request Modal */
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+        }
+        
+        .modal-content h3 {
+            margin-bottom: 1rem;
+            color: #2d5a27;
+        }
+        
+        .modal-content input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+            flex: 1;
+        }
+        
+        .btn-confirm {
+            background: #e67e22;
+            color: white;
+            flex: 1;
+        }
+        
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 1rem;
+            }
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo">
+            🌾 Agri<span>Connect</span>
+        </div>
+        <nav>
+            <ul>
+                <li class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}"><a href="{% url 'home' %}">Home</a></li>
+                <li class="{% if request.resolver_match.url_name == 'restaurant_dashboard' %}active{% endif %}"><a href="{% url 'restaurant_dashboard' %}">My Dashboard</a></li>
+                <li class="profile-menu">
+                    <a href="#" class="btn-profile" onclick="toggleProfileDropdown(event)">
+                        👤 Profile ▼
+                    </a>
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <div class="profile-dropdown-header">
+                            <h3>{{ request.user.first_name }} {{ request.user.last_name }}</h3>
+                            <p>🍽️ Restaurant Account</p>
+                        </div>
+                        <div class="profile-dropdown-body">
+                            <div class="profile-info-item">
+                                <div class="profile-info-icon">👤</div>
+                                <div class="profile-info-content">
+                                    <div class="profile-info-label">Username</div>
+                                    <div class="profile-info-value">{{ request.user.username }}</div>
+                                </div>
+                            </div>
+                            <div class="profile-info-item">
+                                <div class="profile-info-icon">📧</div>
+                                <div class="profile-info-content">
+                                    <div class="profile-info-label">Email</div>
+                                    <div class="profile-info-value">{{ request.user.email }}</div>
+                                </div>
+                            </div>
+                            <div class="profile-info-item">
+                                <div class="profile-info-icon">📱</div>
+                                <div class="profile-info-content">
+                                    <div class="profile-info-label">Phone</div>
+                                    <div class="profile-info-value">{{ request.user.phone|default:"Not provided" }}</div>
+                                </div>
+                            </div>
+                            <div class="profile-info-item">
+                                <div class="profile-info-icon">🍽️</div>
+                                <div class="profile-info-content">
+                                    <div class="profile-info-label">Restaurant Name</div>
+                                    <div class="profile-info-value">{{ request.user.restaurant_profile.restaurant_name }}</div>
+                                </div>
+                            </div>
+                            <div class="profile-info-item">
+                                <div class="profile-info-icon">🏪</div>
+                                <div class="profile-info-content">
+                                    <div class="profile-info-label">Restaurant Type</div>
+                                    <div class="profile-info-value">{{ request.user.restaurant_profile.get_restaurant_type_display }}</div>
+                                </div>
+                            </div>
+                            <div class="profile-info-item">
+                                <div class="profile-info-icon">📍</div>
+                                <div class="profile-info-content">
+                                    <div class="profile-info-label">Address</div>
+                                    <div class="profile-info-value">{{ request.user.restaurant_profile.address }}</div>
+                                </div>
+                            </div>
+                            <div class="profile-info-item">
+                                <div class="profile-info-icon">🧾</div>
+                                <div class="profile-info-content">
+                                    <div class="profile-info-label">GST Number</div>
+                                    <div class="profile-info-value">{{ request.user.restaurant_profile.gst_number|default:"Not provided" }}</div>
+                                </div>
+                            </div>
+                            <div class="profile-info-item">
+                                <div class="profile-info-icon">📅</div>
+                                <div class="profile-info-content">
+                                    <div class="profile-info-label">Member Since</div>
+                                    <div class="profile-info-value">{{ request.user.date_joined|date:"F d, Y" }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li><a href="#" class="btn-logout" onclick="showLogoutModal()">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Display messages -->
+        {% if messages %} {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %} {% endif %}
+
+        <section class="welcome-section">
+            <h1>🍽️ Welcome, {{ request.user.restaurant_profile.restaurant_name }}!</h1>
+            <p>Browse fresh produce from local farmers and request supplies directly.</p>
+        </section>
+
+        <!-- Analytics Dashboard Section -->
+        {% if analytics %}
+        <section class="card" style="background: linear-gradient(135deg, #fff8f0 0%, #ffe6d5 100%); border-left: 5px solid #e67e22;">
+            <h2>📊 Your Analytics Dashboard</h2>
+            
+            <!-- Key Metrics Row -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <div style="background: white; padding: 1rem; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #e67e22;">{{ analytics.summary.total_orders }}</div>
+                    <div style="font-size: 0.9rem; color: #666;">Total Orders</div>
+                </div>
+                <div style="background: white; padding: 1rem; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #28a745;">{{ analytics.summary.completed_orders }}</div>
+                    <div style="font-size: 0.9rem; color: #666;">Completed</div>
+                </div>
+                <div style="background: white; padding: 1rem; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #2196F3;">{{ analytics.summary.fulfillment_rate }}%</div>
+                    <div style="font-size: 0.9rem; color: #666;">Fulfillment Rate</div>
+                </div>
+                <div style="background: white; padding: 1rem; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #f39c12;">⭐ {{ analytics.trust.score }}</div>
+                    <div style="font-size: 0.9rem; color: #666;">Trust Score</div>
+                </div>
+            </div>
+
+            <!-- Spending & Farmer Stats -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <div style="background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="font-size: 0.95rem; color: #2d5a27; margin-bottom: 0.5rem;">💰 Spending</h3>
+                    <div style="font-size: 1.8rem; font-weight: bold; color: #e67e22;">₹{{ analytics.spending.total_spending }}</div>
+                    <div style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">{{ analytics.spending.total_completed_orders }} orders</div>
+                </div>
+                <div style="background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="font-size: 0.95rem; color: #2d5a27; margin-bottom: 0.5rem;">🤝 Farmers</h3>
+                    <div style="font-size: 0.9rem; color: #333;">
+                        <div>Working with: <strong>{{ analytics.farmers.working_with }}</strong></div>
+                        <div>Available: <strong>{{ analytics.farmers.total_available }}</strong></div>
+                        <div>Produce items: <strong>{{ analytics.farmers.available_produce_count }}</strong></div>
+                    </div>
+                </div>
+                <div style="background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="font-size: 0.95rem; color: #2d5a27; margin-bottom: 0.5rem;">🌾 Quality</h3>
+                    <div style="font-size: 1rem; font-weight: bold; color: #28a745;">{{ analytics.quality.avg_freshness_received }}/10</div>
+                    <div style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">Avg Freshness</div>
+                </div>
+            </div>
+
+            <!-- Top Produce & Farmers -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                <div style="background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="font-size: 0.95rem; color: #2d5a27; margin-bottom: 0.5rem;">🔥 Top Produce Ordered</h3>
+                    {% for item in analytics.top_produce %}
+                        <div style="font-size: 0.85rem; padding: 0.3rem 0; border-bottom: 1px solid #e0e0e0;">
+                            <strong>{{ item.name }}</strong><br>
+                            <span style="color: #666;">{{ item.orders }} orders | {{ item.total_quantity }} kg</span>
+                        </div>
+                    {% empty %}
+                        <div style="font-size: 0.85rem; color: #999;">No data yet</div>
+                    {% endfor %}
+                </div>
+                <div style="background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="font-size: 0.95rem; color: #2d5a27; margin-bottom: 0.5rem;">👨‍🌾 Top Farmers</h3>
+                    {% for item in analytics.top_farmers %}
+                        <div style="font-size: 0.85rem; padding: 0.3rem 0; border-bottom: 1px solid #e0e0e0;">
+                            <strong>{{ item.name }}</strong><br>
+                            <span style="color: #666;">₹{{ item.total_spent }} spent</span>
+                        </div>
+                    {% empty %}
+                        <div style="font-size: 0.85rem; color: #999;">No data yet</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Recommended Actions -->
+            {% if analytics.recommended_actions %}
+            <div style="background: #fff3cd; padding: 1rem; border-radius: 8px; margin-top: 1rem; border-left: 4px solid #f39c12;">
+                <h3 style="font-size: 0.95rem; color: #2d5a27; margin-bottom: 0.5rem;">💡 Recommended Actions</h3>
+                {% for action in analytics.recommended_actions %}
+                    <div style="font-size: 0.9rem; padding: 0.5rem 0; {% if action.priority == 'high' %}color: #d9534f;{% elif action.priority == 'medium' %}color: #f39c12;{% else %}color: #5bc0de;{% endif %}">
+                        <strong>{{ action.action }}</strong>: {{ action.reason }}
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </section>
+        {% endif %}
+
+        <!-- Recommendations Section -->
+        {% if recommendations %}
+        <section class="card">
+            <h2>⭐ Recommended Produce For You</h2>
+            <p style="color: #666; margin-bottom: 1rem;">Based on quality, farmer ratings, and market demand</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                {% for item in recommendations %}
+                    <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; border-left: 4px solid #e67e22;">
+                        <h4 style="color: #2d5a27; font-size: 1rem;">{{ item.produce_name }}</h4>
+                        <div style="font-size: 0.9rem; margin-top: 0.5rem;">
+                            <div><strong>From:</strong> {{ item.farmer_name }}</div>
+                            <div><strong>Price:</strong> ₹{{ item.price_per_kg }}/kg</div>
+                            <div><strong>Freshness:</strong> {{ item.freshness_grade|title }}</div>
+                            <div><strong>Score:</strong> {{ item.recommendation_score }}/100</div>
+                            <button class="btn btn-request" style="margin-top: 0.5rem; width: 100%;">Request Supply</button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Quick Stats -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <h3>{{ total_farmers }}</h3>
+                <p>Available Farmers</p>
+            </div>
+            <div class="stat-card orange">
+                <h3>{{ total_produce }}</h3>
+                <p>Fresh Produce Items</p>
+            </div>
+            <div class="stat-card blue">
+                <h3>{{ pending_orders }}</h3>
+                <p>Pending Orders</p>
+            </div>
+        </section>
+
+        <!-- Section: Profile Information -->
+        <section class="card">
+            <h2>👤 My Restaurant Profile</h2>
+            <div class="profile-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                <div class="profile-item">
+                    <label style="font-weight: 600; color: #555; font-size: 0.85rem; text-transform: uppercase;">Restaurant Name</label>
+                    <p style="font-size: 1.1rem; color: #333; margin-top: 0.25rem;">🍽️ {{ request.user.restaurant_profile.restaurant_name }}</p>
+                </div>
+                <div class="profile-item">
+                    <label style="font-weight: 600; color: #555; font-size: 0.85rem; text-transform: uppercase;">Owner Name</label>
+                    <p style="font-size: 1.1rem; color: #333; margin-top: 0.25rem;">{{ request.user.first_name }}</p>
+                </div>
+                <div class="profile-item">
+                    <label style="font-weight: 600; color: #555; font-size: 0.85rem; text-transform: uppercase;">Restaurant Type</label>
+                    <p style="font-size: 1.1rem; color: #333; margin-top: 0.25rem;">{{ request.user.restaurant_profile.get_restaurant_type_display }}</p>
+                </div>
+                <div class="profile-item">
+                    <label style="font-weight: 600; color: #555; font-size: 0.85rem; text-transform: uppercase;">Email Address</label>
+                    <p style="font-size: 1.1rem; color: #333; margin-top: 0.25rem;">{{ request.user.email }}</p>
+                </div>
+                <div class="profile-item">
+                    <label style="font-weight: 600; color: #555; font-size: 0.85rem; text-transform: uppercase;">Phone Number</label>
+                    <p style="font-size: 1.1rem; color: #333; margin-top: 0.25rem;">{{ request.user.phone|default:"Not provided" }}</p>
+                </div>
+                <div class="profile-item">
+                    <label style="font-weight: 600; color: #555; font-size: 0.85rem; text-transform: uppercase;">Address</label>
+                    <p style="font-size: 1.1rem; color: #333; margin-top: 0.25rem;">📍 {{ request.user.restaurant_profile.address }}</p>
+                </div>
+                <div class="profile-item">
+                    <label style="font-weight: 600; color: #555; font-size: 0.85rem; text-transform: uppercase;">GST Number</label>
+                    <p style="font-size: 1.1rem; color: #333; margin-top: 0.25rem;">{{ request.user.restaurant_profile.gst_number|default:"Not provided" }}</p>
+                </div>
+                <div class="profile-item">
+                    <label style="font-weight: 600; color: #555; font-size: 0.85rem; text-transform: uppercase;">Member Since</label>
+                    <p style="font-size: 1.1rem; color: #333; margin-top: 0.25rem;">{{ request.user.date_joined|date:"F d, Y" }}</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Available Produce -->
+        <section class="card">
+            <h2>🥬 Available Produce from Farmers</h2>
+
+            <!-- Available Produce Table -->
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Farmer Name</th>
+                            <th>Produce</th>
+                            <th>Price (₹/kg)</th>
+                            <th>Quantity (kg)</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for produce in available_produce %}
+                        <tr>
+                            <td>👨‍🌾 {{ produce.farmer.first_name }} {{ produce.farmer.last_name }}</td>
+                            <td>{{ produce.name }}</td>
+                            <td>₹{{ produce.price_per_kg }}</td>
+                            <td>{{ produce.quantity }}</td>
+                            <td>
+                                {% if produce.status == 'available' %}
+                                <span class="status status-available">In Stock</span> {% elif produce.status == 'pending' %}
+                                <span class="status status-low">Low Stock</span> {% else %}
+                                <span class="status status-out">Out of Stock</span> {% endif %}
+                            </td>
+                            <td>
+                                {% if produce.quantity > 0 %}
+                                <button class="btn btn-request" onclick="openModal('{{ produce.id }}', '{{ produce.name }}', '{{ produce.quantity }}', '{{ produce.price_per_kg }}')">
+                                    📦 Request Supply
+                                </button> {% else %}
+                                <button class="btn btn-request" disabled style="opacity: 0.5; cursor: not-allowed;">
+                                    📦 Unavailable
+                                </button> {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="empty-message">No produce available at the moment. Check back later!</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section: My Orders -->
+        <section class="card">
+            <h2>📋 My Orders</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Farmer</th>
+                            <th>Produce</th>
+                            <th>Quantity (kg)</th>
+                            <th>Total (₹)</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in my_orders %}
+                        <tr>
+                            <td>#ORD-{{ order.id }}</td>
+                            <td>👨‍🌾 {{ order.farmer.first_name }}</td>
+                            <td>{{ order.produce.name }}</td>
+                            <td>{{ order.quantity_requested }}</td>
+                            <td>₹{{ order.total_price }}</td>
+                            <td>
+                                {% if order.status == 'pending' %}
+                                <span class="status order-pending">⏳ Pending</span> {% elif order.status == 'accepted' %}
+                                <span class="status order-accepted">✓ Accepted</span> {% else %}
+                                <span class="status order-rejected">✗ Rejected</span> {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="empty-message">No orders yet. Request supplies from farmers above!</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Request Modal -->
+    <div id="requestModal" class="modal">
+        <div class="modal-content">
+            <h3>📦 Request Supply</h3>
+            <p id="modal-produce-info"></p>
+            <form id="request-form" method="post" action="">
+                {% csrf_token %}
+                <input type="number" id="request-quantity" name="quantity" placeholder="Enter quantity (kg)" min="1" step="0.01" required>
+                <p id="modal-total" style="font-weight: bold; margin-bottom: 1rem;"></p>
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-confirm">Confirm Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p>🌾 AgriConnect - Bridging Farmers and Restaurants | © 2026 All Rights Reserved</p>
+    </footer>
+
+    <script>
+        let currentPrice = 0;
+
+        function openModal(produceId, produceName, maxQty, price) {
+            // Convert string arguments to appropriate types
+            const id = parseInt(produceId);
+            const max = parseFloat(maxQty);
+            const pricePerKg = parseFloat(price);
+
+            document.getElementById('requestModal').style.display = 'block';
+            document.getElementById('modal-produce-info').textContent = `${produceName} - ₹${pricePerKg}/kg (Max: ${max} kg)`;
+            document.getElementById('request-form').action = `/restaurant/request/${id}/`;
+            document.getElementById('request-quantity').max = max;
+            currentPrice = pricePerKg;
+            updateTotal();
+        }
+
+        function closeModal() {
+            document.getElementById('requestModal').style.display = 'none';
+        }
+
+        function updateTotal() {
+            const qty = document.getElementById('request-quantity').value || 0;
+            const total = (qty * currentPrice).toFixed(2);
+            document.getElementById('modal-total').textContent = `Total: ₹${total}`;
+        }
+
+        document.getElementById('request-quantity').addEventListener('input', updateTotal);
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('requestModal')) {
+                closeModal();
+            }
+            if (event.target == document.getElementById('logoutModal')) {
+                closeLogoutModal();
+            }
+        }
+
+        // Logout modal functions
+        function showLogoutModal() {
+            document.getElementById('logoutModal').style.display = 'block';
+        }
+
+        function closeLogoutModal() {
+            document.getElementById('logoutModal').style.display = 'none';
+        }
+
+        function toggleProfileDropdown(event) {
+            event.preventDefault();
+            const dropdown = document.getElementById('profileDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.profile-menu')) {
+                const dropdown = document.getElementById('profileDropdown');
+                if (dropdown && dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
+            }
+        });
+    </script>
+
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+        <div style="background-color: white; margin: 15% auto; padding: 2rem; border-radius: 15px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">👋</div>
+            <h3 style="color: #2d5a27; margin-bottom: 0.5rem;">Logging Out?</h3>
+            <p style="color: #666; margin-bottom: 1.5rem;">Are you sure you want to logout from AgriConnect?</p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button onclick="closeLogoutModal()" style="padding: 0.75rem 1.5rem; border: 2px solid #ddd; background: white; border-radius: 8px; font-size: 1rem; cursor: pointer; font-weight: 600;">Cancel</button>
+                <a href="{% url 'logout' %}" style="padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; border-radius: 8px; font-size: 1rem; text-decoration: none; font-weight: 600;">Yes, Logout</a>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

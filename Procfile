@@ -1,0 +1,1 @@
+web: cd myproject && python backend/manage.py migrate --noinput && python backend/manage.py collectstatic --noinput && gunicorn --bind 0.0.0.0:$PORT --workers 3 --worker-class sync backend.agriconnect.wsgi:application
